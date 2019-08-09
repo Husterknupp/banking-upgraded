@@ -1,0 +1,28 @@
+{
+  "name": "banking-upgraded",
+  "version": "1.0.0-SNAPSHOT",
+  "description": "🤓 | fix costs | node.js ♥ React.js",
+  "main": "index.js",
+  "scripts": {
+    "prepare": "cd client && npm install && node_modules/.bin/webpack",
+    "start": "node server/index.js"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  },
+  "engines": {
+    "node": "10.4.0",
+    "npm": "6.4.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Husterknupp/banking-upgraded.git"
+  },
+  "keywords": [
+    "banking",
+    "react"
+  ],
+  "license": "Apache-2.0"
+}
