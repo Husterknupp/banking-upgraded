@@ -35,9 +35,10 @@ axios.get("").then(({data}) => {
  */
 app.get('/whatElseIsComing', (req, res) => {
     const today = new Date();
-    const daysOFCurrentMonth = new Date(today.getUTCFullYear(), today.getUTCMonth(), 0).getDate();
+    let currentMonth = today.getUTCMonth() + 1;
+    const daysOFCurrentMonth = new Date(today.getUTCFullYear(), currentMonth, 0).getDate();
 
-    //todo 100 EUR/Woche
+    //todo 100 EUR/Woche (s. u.)
     let result = {
         forSure: {},
         optional: []
@@ -45,13 +46,15 @@ app.get('/whatElseIsComing', (req, res) => {
     for (let day = 1; day <= daysOFCurrentMonth; day++) {
         const yetToCome = ([amount, description, maybeDueDay, optional]) => {
             const dueDay = maybeDueDay || 1;
-            return day <= dueDay;
+            return day <= dueDay && optional !== 'optional';
         };
-        result.forSure[day] = [...(monthly.filter(yetToCome)), ...(yearly[today.getUTCMonth()].filter(yetToCome))];
+        const reservedPerWeek = everyMonday100Bugs();
+        const specificForThisMonth = yearly[currentMonth].filter(yetToCome);
+        result.forSure[day] = [...(monthly.filter(yetToCome)), ...specificForThisMonth];
     }
     result.optional = monthly
       .filter(([amount, description, maybeDueDay, optional]) => optional === 'optional');
-    res.send(JSON.stringify(result));
+    res.json(result);
 
     /* INPUT
         monthly = [
@@ -95,3 +98,7 @@ app.get('/whatElseIsComing', (req, res) => {
         explanations.map(([amount, description]) => {<div>{date}: {description} ({amount})</div>});
      */
 });
+
+function everyMonday100Bugs() {
+    return [[100.00, "1. Mal Kohle"]]
+}
