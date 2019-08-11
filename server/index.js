@@ -1,4 +1,4 @@
-var express = require("express")
+const express = require("express")
   , app = express()
   , bodyParser = require("body-parser")
   , axios = require('axios');
@@ -33,72 +33,98 @@ axios.get("").then(({data}) => {
     ROUTES
     =======
  */
+app.get('/mondaysStillComing', (req, res) => {
+    const {day, month} = req.query;
+    const dayToDayMoneyPerWeek = everyMonday100Bugs(new Date(2019, month || 7, day));
+    res.json(dayToDayMoneyPerWeek);
+});
+
 app.get('/whatElseIsComing', (req, res) => {
     const today = new Date();
-    let currentMonth = today.getUTCMonth() + 1;
-    const daysOFCurrentMonth = new Date(today.getUTCFullYear(), currentMonth, 0).getDate();
+    let currentMonth = month0Based(today) + 1;
+    const daysOFCurrentMonth = new Date(fullYear(today), currentMonth, 0).getDate();
 
     //todo 100 EUR/Woche (s. u.)
     let result = {
         forSure: {},
-        optional: []
+        optional: [],
+        date: {
+            dateDayOfTheMonth: getDate(today),
+            dayOfTheWeek: day(today),
+            currentMonth,
+            daysOFCurrentMonth,
+            year: month0Based(today),
+        },
     };
     for (let day = 1; day <= daysOFCurrentMonth; day++) {
         const yetToCome = ([amount, description, maybeDueDay, optional]) => {
             const dueDay = maybeDueDay || 1;
             return day <= dueDay && optional !== 'optional';
         };
-        const reservedPerWeek = everyMonday100Bugs();
+        const dayToDayMoneyPerWeek = everyMonday100Bugs(new Date(month0Based(today), month0Based(today), day));
         const specificForThisMonth = yearly[currentMonth].filter(yetToCome);
-        result.forSure[day] = [...(monthly.filter(yetToCome)), ...specificForThisMonth];
+        result.forSure[day] = [...(monthly.filter(yetToCome)), ...specificForThisMonth, ...dayToDayMoneyPerWeek];
     }
     result.optional = monthly
       .filter(([amount, description, maybeDueDay, optional]) => optional === 'optional');
     res.json(result);
-
-    /* INPUT
-        monthly = [
-          [505.00,"Miete"],
-          [2.50, "Spotify Benny"],
-            ...
-          [50.00,"Physio Benny","","optional"]
-        ]
-
-        yearly =
-        {"1":
-            [[72.00,"Garten Wasserrechnung"],
-            [197.21,"HUK/Bruderhilfe KFZ Vers."]],
-        "2": [[52.50,"GEZ",15]],
-            ...
-        "12": []}
-     */
-
-    /* BE
-        (1) UI sums up
-        {forSure: {
-            "1": [[52.00,"GEZ",15],[100.00,"Betrag für die Woche",am 1.Montag]],
-            "2": [[52.00,"GEZ",15],[100.00,"Betrag für die Woche",am 1.Montag]],
-            // ...
-            "16": explanations: [[100.00,"Betrag für die Woche",am 3.Montag]],
-        }, optional: [[50.00,"Physio Benny"]] }
-
-        (2) aggregated in BE
-        {forSure: {
-            "1": {amount: "352", explanations: [[52.00,"GEZ",15],[100.00,"Betrag für die Woche",am 1.Montag]]},
-            "2": {amount: "352", explanations: [[52.00,"GEZ",15],[100.00,"Betrag für die Woche",am 1.Montag]]},
-            // ...
-            "16": {amount: "100", explanations: [[100.00,"Betrag für die Woche",am 3.Montag]]},
-        }, optional: [[50.00,"Physio Benny"]] }
-    */
-
-    /* UI
-        const today = new Date();
-        const {amount, explanations} = model[today.getDate()];
-        <div>{amount}</div>
-        explanations.map(([amount, description]) => {<div>{date}: {description} ({amount})</div>});
-     */
 });
 
-function everyMonday100Bugs() {
+function everyMonday100Bugs(today, daysOfCurrentMonth) {
+    console.log(`${today} is base`);
+    const saturday = 6; // yes, Sunday is first day (idx 0)
+    const monday = 1;
+    let diffNextMonday;
+    if (day(today) > monday) {
+        diffNextMonday = saturday - day(today) + (monday + 1);
+    } else {
+        diffNextMonday = monday - day(today);
+    }
+    let nextMonday = new Date(fullYear(today), month0Based(today), getDate(today) + diffNextMonday);
+    console.log({base: today, day: day(today), nextMonday, diffNextMonday });
+
+    let comingMondays = [];
+    while (month0Based(nextMonday) === month0Based(today)) {
+        comingMondays.push(nextMonday);
+        nextMonday = new Date(month0Based(today), month0Based(today), getDate(nextMonday) + 7);
+    }
+    console.log({comingMondays});
+    // last 3 only
+
+    /*
+    * const {dayOfMonth, dayOfWeek} = today();
+    * wie viele Montage kommen noch?
+    * diff zu nxt Montag (wie viele Tage noch?)
+    * nextMonday = heute + diff
+    * while (nextMonday.month === today.month) {
+    *   // last 3 only
+    *   comingMondays.push(nextMonday)
+    *   nextMonday = nextMonday + 7 days
+    * }
+    *
+     */
+    // [].slice(arr.length - 3, arr.length).map((date, idx) => [100.00, Kohle für Alltag', date.day]]
+    let _0meansSunday_1meansMonday_6meansSaturday = day(new Date());
+    let dayOfTheMonth_1based = getDate(new Date());
     return [[100.00, "1. Mal Kohle"]]
+}
+
+function month0Based(date) {
+    // return date.getUTCMonth()
+    return date.getMonth();
+}
+
+function fullYear(date) {
+    // date.getUTCFullYear()
+    return date.getFullYear();
+}
+
+function getDate(date) {
+    // return date.getUTCDate()
+    return date.getDate();
+}
+
+function day(date) {
+    // return date.getUTCDay()
+    return date.getDay();
 }
