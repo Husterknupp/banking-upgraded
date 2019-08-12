@@ -47,23 +47,18 @@ axios
  */
 app.get("/mondaysStillComing", (req, res) => {
   const { day, month } = req.query;
-  const dayToDayMoneyPerWeek = everyMonday100Bugs(
-    new Date(2019, month || 7, day)
-  );
+  const dayToDayMoneyPerWeek = getWeeklyBudget(new Date(2019, month || 7, day));
   res.json(dayToDayMoneyPerWeek);
 });
 
 app.get("/whatElseIsComing", (req, res) => {
+  const firstDayOfMonth = req.query.day || 1;
   const today = new Date();
-  let currentMonth = month0Based(today) + 1;
-  const daysOFCurrentMonth = new Date(
-    fullYear(today),
-    currentMonth,
-    0
-  ).getDate();
+  const currentMonth = month0Based(today) + 1;
+  const daysOFCurrentMonth =
+    req.query.day || new Date(fullYear(today), currentMonth, 0).getDate();
 
-  //todo 100 EUR/Woche (s. u.)
-  let result = {
+  const result = {
     forSure: {},
     optional: [],
     date: {
@@ -71,32 +66,35 @@ app.get("/whatElseIsComing", (req, res) => {
       dayOfTheWeek: day(today),
       currentMonth,
       daysOFCurrentMonth,
-      year: month0Based(today)
+      year: fullYear(today)
     }
   };
-  for (let day = 1; day <= daysOFCurrentMonth; day++) {
+
+  for (let day = firstDayOfMonth; day <= daysOFCurrentMonth; day++) {
     const yetToCome = ([amount, description, maybeDueDay, optional]) => {
       const dueDay = maybeDueDay || 1;
       return day <= dueDay && optional !== "optional";
     };
-    const dayToDayMoneyPerWeek = everyMonday100Bugs(
-      new Date(month0Based(today), month0Based(today), day)
+
+    const weeklyBudget = getWeeklyBudget(
+      new Date(fullYear(today), month0Based(today), day)
     );
     const specificForThisMonth = yearly[currentMonth].filter(yetToCome);
     result.forSure[day] = [
       ...monthly.filter(yetToCome),
       ...specificForThisMonth,
-      ...dayToDayMoneyPerWeek
+      ...weeklyBudget
     ];
   }
+
   result.optional = monthly.filter(
     ([amount, description, maybeDueDay, optional]) => optional === "optional"
   );
+
   res.json(result);
 });
 
-function everyMonday100Bugs(today, daysOfCurrentMonth) {
-  console.log(`${today} is base`);
+function getWeeklyBudget(today) {
   const saturday = 6; // yes, Sunday is first day (idx 0)
   const monday = 1;
   let diffNextMonday;
@@ -110,36 +108,27 @@ function everyMonday100Bugs(today, daysOfCurrentMonth) {
     month0Based(today),
     getDate(today) + diffNextMonday
   );
-  console.log({ base: today, day: day(today), nextMonday, diffNextMonday });
+  // keep for debugging
+  //console.log({ base: today, day: day(today), nextMonday, diffNextMonday });
 
   let comingMondays = [];
   while (month0Based(nextMonday) === month0Based(today)) {
     comingMondays.push(nextMonday);
     nextMonday = new Date(
-      month0Based(today),
+      fullYear(today),
       month0Based(today),
       getDate(nextMonday) + 7
     );
   }
-  console.log({ comingMondays });
-  // last 3 only
+  // keep for debugging
+  //console.log({ comingMondays });
 
-  /*
-   * const {dayOfMonth, dayOfWeek} = today();
-   * wie viele Montage kommen noch?
-   * diff zu nxt Montag (wie viele Tage noch?)
-   * nextMonday = heute + diff
-   * while (nextMonday.month === today.month) {
-   *   // last 3 only
-   *   comingMondays.push(nextMonday)
-   *   nextMonday = nextMonday + 7 days
-   * }
-   *
-   */
-  // [].slice(arr.length - 3, arr.length).map((date, idx) => [100.00, Kohle für Alltag', date.day]]
-  let _0meansSunday_1meansMonday_6meansSaturday = day(new Date());
-  let dayOfTheMonth_1based = getDate(new Date());
-  return [[100.0, "1. Mal Kohle"]];
+  // we're interested only in the past three Mondays because safety "nach hinten raus"
+  // also if the last month is on 28th+ we don't consider because almost the next month arrived ($$)
+  return comingMondays
+    .filter(date => date.getDate() <= 27)
+    .slice(Math.max(comingMondays.length - 3, 0), comingMondays.length)
+    .map((date, idx) => [100.0, "Kohle für Alltag", date.getDate()]);
 }
 
 function month0Based(date) {
