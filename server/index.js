@@ -47,8 +47,11 @@ axios
  */
 app.get("/mondaysStillComing", (req, res) => {
   const { day, month } = req.query;
-  const dayToDayMoneyPerWeek = getWeeklyBudget(new Date(2019, month || 7, day));
-  res.json(dayToDayMoneyPerWeek);
+  res.json(
+    getWeeklyBudgetForComingWeeks(
+      new Date(new Date().getFullYear(), month || new Date().getMonth(), day)
+    )
+  );
 });
 
 app.get("/whatElseIsComing", (req, res) => {
@@ -76,7 +79,7 @@ app.get("/whatElseIsComing", (req, res) => {
       return day <= dueDay && optional !== "optional";
     };
 
-    const weeklyBudget = getWeeklyBudget(
+    const weeklyBudget = getWeeklyBudgetForComingWeeks(
       new Date(fullYear(today), month0Based(today), day)
     );
     const specificForThisMonth = yearly[currentMonth].filter(yetToCome);
@@ -94,7 +97,7 @@ app.get("/whatElseIsComing", (req, res) => {
   res.json(result);
 });
 
-function getWeeklyBudget(today) {
+function getWeeklyBudgetForComingWeeks(today) {
   const saturday = 6; // yes, Sunday is first day (idx 0)
   const monday = 1;
   let diffNextMonday;
