@@ -4,7 +4,7 @@
   "description": "🤓 | fix costs | node.js ♥ React.js",
   "main": "index.js",
   "scripts": {
-    "prepare": "cd client && npm install && node_modules/.bin/webpack",
+    "prepare": "cd client && npm install && npm build",
     "start": "node server/index.js"
   },
   "dependencies": {
@@ -26,6 +26,7 @@
   ],
   "license": "Apache-2.0",
   "devDependencies": {
+    "jest": "24.8.0",
     "prettier": "^1.18.2"
   }
 }

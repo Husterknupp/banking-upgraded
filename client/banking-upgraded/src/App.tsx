@@ -36,7 +36,7 @@ const App: React.FC = () => {
   useEffect(() => {
     (async () => {
       const request = await fetch("/whatElseIsComing");
-      const { forSure, date, optional } = (await request.json()) as Response;
+      const { forSure, date } = (await request.json()) as Response;
       setForSure(forSure);
       setDate(date.dateDayOfTheMonth);
       setMonth(date.currentMonth);
@@ -47,7 +47,9 @@ const App: React.FC = () => {
   let expensesSummarized;
   if (forSure) {
     expenses = forSure[displayDate.getDate().toString()];
-    expensesSummarized = expenses.reduce((prev, [amount]) => prev + amount, 0);
+    expensesSummarized =
+      Math.round(expenses.reduce((prev, [amount]) => prev + amount, 0) * 100) /
+      100;
   }
 
   if (expenses !== undefined && date && month) {
@@ -61,9 +63,9 @@ const App: React.FC = () => {
             <div style={{ fontWeight: "bold" }}>Wie viel geht noch ab?</div>
             <h2>€ {expensesSummarized}</h2>
             <ul>
-              {expenses.map(([amount, description, dateHappening]) => {
+              {expenses.map(([amount, description, dateHappening], idx) => {
                 return (
-                  <li style={{ margin: ".2em 0" }}>
+                  <li style={{ margin: ".2em 0" }} key={idx}>
                     € {amount} (am {dateHappening}. für {description})
                   </li>
                 );

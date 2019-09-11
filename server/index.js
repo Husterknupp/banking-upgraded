@@ -2,6 +2,8 @@ const express = require("express"),
   app = express(),
   bodyParser = require("body-parser"),
   axios = require("axios");
+const { getDate, getMonthOfDate, day, fullYear } = require("./dateUtils");
+const { getWeeklyBudgetForComingWeeks } = require("./payDayCalculator");
 
 /*global __dirname:false*/
 /*  ====================
@@ -57,7 +59,7 @@ app.get("/mondaysStillComing", (req, res) => {
 app.get("/whatElseIsComing", (req, res) => {
   const firstDayOfMonth = req.query.day || 1;
   const today = new Date();
-  const currentMonth = month0Based(today) + 1;
+  const currentMonth = getMonthOfDate(today) + 1;
   const daysOFCurrentMonth =
     req.query.day || new Date(fullYear(today), currentMonth, 0).getDate();
 
@@ -80,7 +82,7 @@ app.get("/whatElseIsComing", (req, res) => {
     };
 
     const weeklyBudget = getWeeklyBudgetForComingWeeks(
-      new Date(fullYear(today), month0Based(today), day)
+      new Date(fullYear(today), getMonthOfDate(today), day)
     );
     const specificForThisMonth = yearly[currentMonth].filter(yetToCome);
     result.forSure[day] = [
@@ -96,60 +98,3 @@ app.get("/whatElseIsComing", (req, res) => {
 
   res.json(result);
 });
-
-function getWeeklyBudgetForComingWeeks(today) {
-  const saturday = 6; // yes, Sunday is first day (idx 0)
-  const monday = 1;
-  let diffNextMonday;
-  if (day(today) > monday) {
-    diffNextMonday = saturday - day(today) + (monday + 1);
-  } else {
-    diffNextMonday = monday - day(today);
-  }
-  let nextMonday = new Date(
-    fullYear(today),
-    month0Based(today),
-    getDate(today) + diffNextMonday
-  );
-  // keep for debugging
-  //console.log({ base: today, day: day(today), nextMonday, diffNextMonday });
-
-  let comingMondays = [];
-  while (month0Based(nextMonday) === month0Based(today)) {
-    comingMondays.push(nextMonday);
-    nextMonday = new Date(
-      fullYear(today),
-      month0Based(today),
-      getDate(nextMonday) + 7
-    );
-  }
-  // keep for debugging
-  //console.log({ comingMondays });
-
-  // we're interested only in the past three Mondays because safety "nach hinten raus"
-  // also if the last month is on 28th+ we don't consider because almost the next month arrived ($$)
-  return comingMondays
-    .filter(date => date.getDate() <= 27)
-    .slice(Math.max(comingMondays.length - 3, 0), comingMondays.length)
-    .map((date, idx) => [100.0, "Kohle für Alltag", date.getDate()]);
-}
-
-function month0Based(date) {
-  // return date.getUTCMonth()
-  return date.getMonth();
-}
-
-function fullYear(date) {
-  // date.getUTCFullYear()
-  return date.getFullYear();
-}
-
-function getDate(date) {
-  // return date.getUTCDate()
-  return date.getDate();
-}
-
-function day(date) {
-  // return date.getUTCDay()
-  return date.getDay();
-}
