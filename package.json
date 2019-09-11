@@ -4,7 +4,7 @@
   "description": "🤓 | fix costs | node.js ♥ React.js",
   "main": "index.js",
   "scripts": {
-    "prepare": "cd client && npm install && npm run build",
+    "prepare": "cd client/banking-upgraded && npm install && npm run build",
     "start": "node server/index.js",
     "test": "npx jest server/"
   },

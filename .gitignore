@@ -1,7 +1,6 @@
 .idea/
 node_modules/
-client/dist/
-client/node_modules
+client/banking-upgraded/node_modules
 npm-debug.log
 .DS_Store
 

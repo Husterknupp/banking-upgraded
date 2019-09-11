@@ -1,23 +1,14 @@
 # banking-upgraded
 🤓 | fix costs | node.js ♥ React.js
 
-### Dependencies and Bundling
-```
-$ npm install
-```
-##### Webpack in Dev Mode
-`./client$ node_modules/.bin/webpack --watch`
+### UI
+see client/banking-upgraded
 
-##### NPM and Node Versions
-  - `node ^10.4.x`
-  - `npm ^6.4.x`
+### Backend
+1. `npm install`
+2. `npm start`
 
-### Start Backend
-```
-$ npm start
-```
-
-`app` should be running now on `localhost:5000`
+If you have installed the UI before, then opening `localhost:5000` in a browser should show the working app now.
 
 ### Try it Live
 https://banking-upgraded.herokuapp.com/
