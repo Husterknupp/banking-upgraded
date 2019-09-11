@@ -12,7 +12,7 @@ const { getWeeklyBudgetForComingWeeks } = require("./payDayCalculator");
  */
 app.set("port", process.env.PORT || 5000);
 app.use(bodyParser.json());
-app.use(express.static(__dirname + "/../client"));
+app.use(express.static(__dirname + "/../client/banking-upgraded/build"));
 app.listen(app.get("port"), () => {
   // heroku transparency
   console.log(`Node app is running on port ${app.get("port")}`);
