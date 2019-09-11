@@ -6,3 +6,8 @@ cache:
   - "$HOME/.npm"
   - "$TRAVIS_BUILD_DIR/node_modules"
   - "$TRAVIS_BUILD_DIR/client/node_modules"
+deploy:
+  provider: heroku
+  api_key:
+    secure: naGpGw2O4U92yWSSr0XdKonOQw71ViIrsrJxKR81VFWzrIA4cL5IrzFwUIUhsxrlOegq9nXiFUk0QfyZVFssLSdhJWfRRVJTJBajSUmO81dH6PnCqg6gVyyEqiNj30M38n0bOhqes6LT8zc42Ypw8ugMTEnR3T9NJzaKsna6IeyQZ6kG08Ki3Du3jCHfemf2r/oLP8adrG8dPgsJctLp4kszc9iXx+l9FsN32Y3d8wfgVTJMfwcfS2mUPu54nZhmKX9e6MBi7CMhRrkH/yOfyVSNQewkYR3q5d+pEhoPEx/67YtheVjhfGDXWVeN9BpX2aAbNYCd0TfaXs4stniR0yQuz9kiC4c7IyPHonwhylTNPRN25Tt2ImQnH1aySVyD+SULfs6w2IVArJ4lF7ogGHOf9uTm8q5lMLjK4RLaV2kuij5WShFkXBqwkDdV0m/ti2hB1Zq0cF57zZs+1doWMMvDfBJC3N0D4A3WZsZ0KSCrvblHIlKoiT/ewLYnImQl/t/xB2ZGcTTY/GzXDghr7XSGtNehETHyGV/f7i3VZcUPBd+JjoSaWQlkw4Ky13MXyMhjNOREHqe4fy/jGfOI5R0gRwo+lanu6AiDFCxzeNH5B8hcjEI1Ue2Kn0n5b0ilBrSf2mhLNLicxOWBgXhV1N4pBXtx2X4VR+yl6zAKM0U=
+  skip_cleanup: true
