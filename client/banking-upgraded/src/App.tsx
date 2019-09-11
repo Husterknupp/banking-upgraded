@@ -75,7 +75,14 @@ const App: React.FC = () => {
       </>
     );
   } else {
-    return <div>🍌 nothing to show here</div>;
+    return (
+      <div>
+        <span role={"img"} aria-label={"boring banana"}>
+          🍌
+        </span>{" "}
+        nothing to show here
+      </div>
+    );
   }
 };
 
