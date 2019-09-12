@@ -1,46 +1,78 @@
 import React, { useEffect, useState } from "react";
 
-interface Response {
-  forSure: ForSure;
-  date: {
-    currentMonth: number;
-    dateDayOfTheMonth: number;
-    dayOfTheWeek: number;
-    daysOFCurrentMonth: number;
-    year: number;
+export default () => {
+  const [documentResponse, setDocumentResponse] = useState<Response | null>(
+    null
+  );
+  const [currentUrlInput, setCurrentUrlInput] = useState("");
+
+  return !documentResponse ? (
+    <DocumentRetrieval
+      currentInputValue={currentUrlInput}
+      onInputUpdate={(newInput: string) => setCurrentUrlInput(newInput)}
+      onDocumentRetrieval={(documentResponse: Response) =>
+        setDocumentResponse(documentResponse)
+      }
+    />
+  ) : (
+    <ComingExpenses document={documentResponse} />
+  );
+};
+
+type DocumentRetrievalProps = {
+  currentInputValue: string;
+  onInputUpdate: (input: string) => void;
+  onDocumentRetrieval: (documentResponse: Response) => void;
+};
+
+function DocumentRetrieval({
+  currentInputValue,
+  onInputUpdate,
+  onDocumentRetrieval
+}: DocumentRetrievalProps): JSX.Element {
+  const loadDocumentFromBackend = async () => {
+    const request = await fetch(
+      `/whatElseIsComing?documentUrl=${currentInputValue}`
+    );
+    onDocumentRetrieval((await request.json()) as Response);
   };
-  optional: Array<Expense>;
+
+  return (
+    <div
+      style={{
+        height: "100vh",
+        width: "100vw",
+        textAlign: "center"
+      }}
+    >
+      <input
+        type={"text"}
+        onChange={event => onInputUpdate(event.target.value)}
+        placeholder={"dropbox url"}
+        value={currentInputValue}
+        style={{ marginTop: "46vh", fontSize: "xx-large" }}
+        autoFocus={true}
+        onKeyPress={({ which }) => which === 13 && loadDocumentFromBackend()}
+      />
+      <button
+        onClick={loadDocumentFromBackend}
+        style={{ fontSize: "xx-large" }}
+      >
+        {" "}
+        Laden
+      </button>
+    </div>
+  );
 }
 
-interface ForSure {
-  [dayOfTheMonth: string]: Array<Expense>;
-}
-
-/*
-  [
-    amount:number,
-    description:string,
-    date:number|undefined,
-    optional:string|undefined,
-  ]
- */
-type Expense = [number, string, number?, "optional"?];
-
-const App: React.FC = () => {
-  const [date, setDate] = useState<number | null>(null);
-  const [month, setMonth] = useState<number | null>(null);
-  const [forSure, setForSure] = useState<ForSure | null>(null);
+type ComingExpensesProps = {
+  document: Response;
+};
+function ComingExpenses({ document }: ComingExpensesProps): JSX.Element {
+  const { forSure, date } = document;
+  const dayOfTheMonth = date.dateDayOfTheMonth;
+  const month = date.currentMonth;
   const displayDate = new Date();
-
-  useEffect(() => {
-    (async () => {
-      const request = await fetch("/whatElseIsComing");
-      const { forSure, date } = (await request.json()) as Response;
-      setForSure(forSure);
-      setDate(date.dateDayOfTheMonth);
-      setMonth(date.currentMonth);
-    })();
-  }, []);
 
   let expenses;
   let expensesSummarized;
@@ -51,12 +83,12 @@ const App: React.FC = () => {
       100;
   }
 
-  if (expenses !== undefined && date && month) {
+  if (expenses !== undefined && dayOfTheMonth && month) {
     return (
       <>
         <div style={{ display: "flex", margin: "3em" }}>
           <small style={{ marginRight: "1em" }}>
-            {date}. {month}.
+            {dayOfTheMonth}. {month}.
           </small>
           <div>
             <div style={{ fontWeight: "bold" }}>Wie viel geht noch ab?</div>
@@ -84,6 +116,30 @@ const App: React.FC = () => {
       </div>
     );
   }
-};
+}
 
-export default App;
+interface Response {
+  forSure: ForSure;
+  date: {
+    currentMonth: number;
+    dateDayOfTheMonth: number;
+    dayOfTheWeek: number;
+    daysOFCurrentMonth: number;
+    year: number;
+  };
+  optional: Array<Expense>;
+}
+
+interface ForSure {
+  [dayOfTheMonth: string]: Array<Expense>;
+}
+
+/*
+  [
+    amount:number,
+    description:string,
+    date:number|undefined,
+    optional:string|undefined,
+  ]
+ */
+type Expense = [number, string, number?, "optional"?];
