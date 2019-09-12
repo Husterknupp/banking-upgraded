@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 export default () => {
   const [documentResponse, setDocumentResponse] = useState<Response | null>(
