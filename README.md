@@ -1,3 +1,7 @@
+# Repo is ARCHIVED
+
+Security issues (npm dependencies) need to be fixed before development can continue.
+
 # banking-upgraded
 🤓 | fix costs | node.js ♥ React.js
 
